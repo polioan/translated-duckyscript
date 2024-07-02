@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>translated-duckyscript</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      html {
+        line-height: 1.5;
+        font-size: 16px;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          'Open Sans',
+          'Helvetica Neue',
+          sans-serif;
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        tab-size: 4;
+        -o-tab-size: 4;
+        -moz-tab-size: 4;
+      }
+
+      html:focus-within {
+        scroll-behavior: smooth;
+      }
+
+      a {
+        background-color: transparent;
+        -webkit-text-decoration-skip: objects;
+      }
+
+      .container {
+        margin: 1rem;
+      }
+
+      .text-input,
+      .text-output {
+        overflow: auto;
+        font: inherit;
+        resize: vertical;
+        min-height: 40vh;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a
+        href="https://github.com/polioan/translated-duckyscript"
+        class="source"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Исходный код</a
+      >
+      <p id="commands"></p>
+      <textarea id="text-input" class="text-input" required></textarea>
+      <textarea id="text-output" class="text-output" readonly></textarea>
+    </div>
+    <script>
+      // @ts-check
+
+      const textInput = document.querySelector('#text-input')
+      const textOutput = document.querySelector('#text-output')
+      const commands = document.querySelector('#commands')
+
+      const language = new Map(
+        Object.entries(
+          Object.freeze({
+            ЗАМЕТКА: 'REM',
+            ЗАДЕРЖКА_ПО_УМОЛЧАНИЮ: 'DEFAULT_DELAY',
+            ЗАДЕРЖКАПОУМОЛЧАНИЮ: 'DEFAULTDELAY',
+            ЗАДЕРЖКА: 'DELAY',
+            СТРОКА: 'STRING',
+            ВИНДОВС: 'WINDOWS',
+            ГУИ: 'GUI',
+            МЕНЮ: 'MENU',
+            ПРИЛОЖЕНИЕ: 'APP',
+            ШИФТ: 'SHIFT',
+            АЛЬТ: 'ALT',
+            КОНТРОЛ: 'CONTROL',
+            КТРЛ: 'CTRL',
+            СТРЕЛКАВНИЗ: 'DOWNARROW',
+            СТРЕЛКАВЛЕВО: 'LEFTARROW',
+            СТРЕЛКАВПРАВО: 'RIGHTARROW',
+            СТРЕЛКАВВЕРХ: 'UPARROW',
+            ВНИЗ: 'DOWN',
+            ВЛЕВО: 'LEFT',
+            ВПРАВО: 'RIGHT',
+            ВВЕРХ: 'UP',
+            ПОВТОРИТЬ: 'REPEAT',
+          })
+        )
+      )
+
+      commands.textContent = `Доступные команды - ${[...language.keys()].join(', ')}`
+
+      /**
+       * @param {string} payload
+       */
+      function transform(payload) {
+        return payload
+          .split('\n')
+          .map(line => {
+            return line.replaceAll('\r', '')
+          })
+          .map(line => {
+            if (!line.trim()) {
+              return ''
+            }
+            const [command, ...settings] = line.split(' ')
+            const translatedCommand = language.get(command)
+            if (!translatedCommand) {
+              throw new Error(`Команда "${command}" не найдена.`)
+            }
+            return [translatedCommand, ...settings].join(' ')
+          })
+          .join('\n')
+      }
+
+      textInput.placeholder = `
+СТРОКА Hello world
+ПОВТОРИТЬ 10
+            `.trim()
+
+      textInput.addEventListener('input', e => {
+        try {
+          textOutput.textContent = transform(e.target.value)
+        } catch (error) {
+          textOutput.textContent = error.message
+        }
+      })
+    </script>
+  </body>
+</html>
